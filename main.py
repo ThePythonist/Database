@@ -21,6 +21,8 @@ def create_table(table_name, fields):
 
 
 def select_from(table_name):
+    cur.execute("PRAGMA table_info(movies);")
+    fields = cur.fetchall()
     try:
         entry = input("Do you need any filter (yes/no) ? : ")
         if entry == "yes":
@@ -29,14 +31,26 @@ def select_from(table_name):
 
             command = f"SELECT * FROM {table_name} WHERE {column} {condition} ;"
             cur.execute(command)
-            records = cur.fetchall()
-            print(records)
+            values = cur.fetchall()
+            print(values)
 
         elif entry == "no":
             command = f"SELECT * FROM {table_name};"
             cur.execute(command)
-            records = cur.fetchall()
-            print(records)
+            values = cur.fetchall()
+
+            fields2 = []
+            for i in range(len(fields)):
+                fields2.append(fields[i][1])
+
+            records = []
+
+            for i in values:
+                records.append(dict(zip(tuple(fields2), i, )))
+
+            for i in records:
+                print(i)
+
         else:
             print("Invalid input. Try again")
             select_from(input("Enter table name : "))
@@ -45,19 +59,31 @@ def select_from(table_name):
             print("Table not found. Try again:")
 
 
+def insert(table_name):
+    cur.execute("PRAGMA table_info(movies);")
+    records = cur.fetchall()
+    values = []
+
+    for i in range(len(records)):
+        entry = input(f"{records[i][1]} : ")
+        values.append(entry)
+
+    command = "INSERT INTO {} VALUES {};".format(table_name, tuple(values))
+    cur.execute(command)
+    con.commit()
+    print("Done")
+
+
 while True:
-    action = input("Action ( create / select / insert ) : ").casefold()
-    if action == "create":
+    action = input("Action ( 1 : create / 2 : select / 3 : insert ) : ").casefold()
+    if action == "1":
         create_table(input("Enter table name : "), input("Enter number of table fields : "))
         break
-    elif action == "select":
+    elif action == "2":
         select_from(input("Enter table name : "))
         break
-    elif action == "insert":
-        cur.execute("PRAGMA table_info(movies);")
-        records = cur.fetchall()
-        print(len(records))
+    elif action == "3":
+        insert(input("Enter table name : "))
         break
     else:
         print("Invalid input. Try again")
-   
