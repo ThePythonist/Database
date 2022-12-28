@@ -20,24 +20,44 @@ def create_table(table_name, fields):
     print("Done")
 
 
-# create_table(input("Enter table name : "), input("Enter number of table fields : "))
-# cur.execute("CREATE TABLE  (id INT, name VARCHAR(50), job VARCHAR(50), age INT);")
-# cur.execute("INSERT INTO customers VALUES (1102,'Ava','Female',20);")
+def select_from(table_name):
+    try:
+        entry = input("Do you need any filter (yes/no) ? : ")
+        if entry == "yes":
+            column = input("Column : ")
+            condition = input("Condition : ")
 
-# cur.execute("SELECT * FROM customers;")
-# records = cur.fetchall()
-# print(records)
+            command = f"SELECT * FROM {table_name} WHERE {column} {condition} ;"
+            cur.execute(command)
+            records = cur.fetchall()
+            print(records)
 
-# con.commit()
-# con.close()
-# print('Done')
+        elif entry == "no":
+            command = f"SELECT * FROM {table_name};"
+            cur.execute(command)
+            records = cur.fetchall()
+            print(records)
+        else:
+            print("Invalid input. Try again")
+            select_from(input("Enter table name : "))
+    except sqlite3.OperationalError as error:
+        if "no such table" in error:
+            print("Table not found. Try again:")
+
 
 while True:
-    entry = input("Action : ").casefold()
-    if entry == "create":
+    action = input("Action ( create / select / insert ) : ").casefold()
+    if action == "create":
         create_table(input("Enter table name : "), input("Enter number of table fields : "))
         break
-    else:
-        cur.execute("SELECT * FROM movies;")
+    elif action == "select":
+        select_from(input("Enter table name : "))
+        break
+    elif action == "insert":
+        cur.execute("PRAGMA table_info(movies);")
         records = cur.fetchall()
-        print(records)
+        print(len(records))
+        break
+    else:
+        print("Invalid input. Try again")
+   
